@@ -1,0 +1,18 @@
+---
+- name: Manage Proxmox LXC containers
+  hosts: localhost
+  connection: local
+  gather_facts: no
+
+  # Load credentials and LXC definitions
+  vars_files:
+    - ../vars/proxmox-vault.yml
+    - ../vars/lxcs.yml
+
+  tasks:
+    - name: Process each LXC container
+      include_role:
+        name: proxmox_lxc
+      loop: "{{ lxcs }}"
+      loop_control:
+        loop_var: container

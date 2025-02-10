@@ -1,0 +1,5 @@
+[test_servers]
+localhost ansible_connection=local
+
+[all:vars]
+ansible_python_interpreter=/home/yourusername/ansible/venv/bin/python3.xx

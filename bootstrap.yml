@@ -1,0 +1,12 @@
+---
+- name: Bootstrap dependencies
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Install required Python libraries
+      ansible.builtin.pip:
+        name:
+          - proxmoxer
+          - requests
+        state: present
