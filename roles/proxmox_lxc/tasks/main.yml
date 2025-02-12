@@ -9,3 +9,19 @@
 - name: Run deletion tasks if state is absent
   include_tasks: delete.yml
   when: container.state == 'absent'
+
+- name: Wait for container status if state is started and flag is set
+  include_tasks: status.yml
+  when: container.state == 'started' and (container.wait_for_status | default(false))
+
+- name: Run start tasks if state is started
+  include_tasks: start.yml
+  when: container.state == 'started'
+
+- name: Run stop tasks if state is stopped
+  include_tasks: stop.yml
+  when: container.state == 'stopped'
+
+- name: Retrieve container IP if flag is set
+  include_tasks: get_ip.yml
+  when: container.get_ip | default(false)

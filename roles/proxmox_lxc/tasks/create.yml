@@ -17,5 +17,8 @@
     swap: "{{ container.swap }}"
     disk: "{{ container.disk }}"
     netif: '{"net0": "{{ container.net }}"}'
-    password: "{{ container.password }}"
+    password: "{{ container.password | default(omit) }}"
+    onboot: "{{ container.onboot | default(false) }}"
+    startup: "{{ container.startup | default(omit) }}"
+    pubkey: "{{ lookup('file', container.pubkey_file) | default(omit) }}"
     state: present
