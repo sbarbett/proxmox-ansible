@@ -25,3 +25,15 @@
 - name: Retrieve container IP if flag is set
   include_tasks: get_ip.yml
   when: container.get_ip | default(false)
+
+- name: Add container to dynamic inventory if initial_setup is true
+  add_host:
+    name: "lxc_{{ container.vmid }}"
+    groups: proxmox_containers
+    ansible_host: "{{ container_ip }}"
+    ansible_connection: ssh
+    ansible_user: root
+    ansible_ssh_private_key_file: "{{ container.private_key }}"
+    ansible_python_interpreter: /usr/bin/python3
+    container: "{{ container }}"
+  when: container.initial_setup | default(false) and container.get_ip | default(false)

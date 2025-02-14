@@ -16,3 +16,11 @@
       loop: "{{ lxcs }}"
       loop_control:
         loop_var: container
+
+- name: Run initial setup on provisioned containers
+  hosts: proxmox_containers
+  gather_facts: yes
+  become: yes
+  tasks:
+    - name: Run initial setup tasks inside container
+      include_tasks: ../roles/proxmox_lxc/tasks/setup.yml

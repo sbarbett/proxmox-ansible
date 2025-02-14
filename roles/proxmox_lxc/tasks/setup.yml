@@ -1,0 +1,60 @@
+- name: Update apt cache and upgrade packages
+  apt:
+    update_cache: yes
+    upgrade: dist
+  become: yes
+
+- name: Ensure sudo is installed
+  apt:
+    name: sudo
+    state: present
+  become: yes
+
+- name: Create non-root user
+  user:
+    name: "{{ container.username | default('demo') }}"
+    shell: /bin/bash
+    create_home: yes
+    password: "{{ container.user_password | default('demo123') | password_hash('sha512') }}"
+  become: yes
+
+- name: Add user to sudo group
+  user:
+    name: "{{ container.username | default('demo') }}"
+    groups: sudo
+    append: yes
+  become: yes
+
+- name: Copy SSH public key to demo's authorized_keys
+  authorized_key:
+    user: "{{ container.username | default('demo') }}"
+    state: present
+    key: "{{ lookup('file', container.pubkey_file) }}"
+  become: yes
+
+- name: Ensure PubkeyAuthentication is enabled in sshd_config
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PubkeyAuthentication'
+    line: 'PubkeyAuthentication yes'
+  become: yes
+
+- name: Ensure PasswordAuthentication is disabled in sshd_config
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PasswordAuthentication'
+    line: 'PasswordAuthentication no'
+  become: yes
+
+- name: Ensure PermitRootLogin is disabled in sshd_config
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PermitRootLogin'
+    line: 'PermitRootLogin no'
+  become: yes
+
+- name: Restart SSH service
+  service:
+    name: ssh
+    state: restarted
+  become: yes
