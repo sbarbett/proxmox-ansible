@@ -44,3 +44,21 @@
   gather_facts: yes
   tasks:
     - include_tasks: ../roles/proxmox_lxc/tasks/extras.yml
+
+- name: Run docker setup on provisioned containers
+  hosts: proxmox_containers_docker
+  gather_facts: yes
+  roles:
+    - role: geerlingguy.docker
+      vars:
+        docker_edition: 'ce'
+        docker_service_state: started
+        docker_service_enabled: true
+        docker_packages:
+          - "docker-{{ docker_edition }}"
+          - "docker-{{ docker_edition }}-cli"
+          - "docker-{{ docker_edition }}-rootless-extras"
+        docker_packages_state: present
+        docker_install_compose_plugin: true
+        docker_compose_package: docker-compose-plugin
+        docker_compose_package_state: present

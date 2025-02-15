@@ -2,6 +2,7 @@
 vars/**
 inventory
 roles/proxmox_lxc/defaults/main.yml
+roles/geerlingguy.docker/**
 
 ## Generic Python .gitignore
 # Byte-compiled / optimized / DLL files

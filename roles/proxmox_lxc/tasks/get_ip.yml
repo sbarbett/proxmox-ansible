@@ -1,4 +1,6 @@
 ---
+# roles/proxmox_lxc/tasks/get_ip.yml
+
 - name: Retrieve container IP via DHCP using proxmoxer
   command: >
     {{ role_path }}/files/get_container_ip.py

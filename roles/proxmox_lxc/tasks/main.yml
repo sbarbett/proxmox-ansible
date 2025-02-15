@@ -1,4 +1,3 @@
-#SPDX-License-Identifier: MIT-0
 ---
 # tasks file for roles/proxmox_lxc
 
@@ -51,3 +50,17 @@
     ansible_become: yes
     ansible_become_method: sudo
   when: container.install_extras | default(false) and container.initial_setup | default(false)
+
+- name: Add container to dynamic inventory for docker setup
+  add_host:
+    name: "lxc_{{ container.vmid }}_user"
+    groups: proxmox_containers_docker
+    ansible_host: "{{ container_ip }}"
+    ansible_connection: ssh
+    ansible_user: "{{ container.username | default('demo') }}"
+    ansible_ssh_private_key_file: "{{ container.private_key }}"
+    ansible_python_interpreter: /usr/bin/python3
+    container: "{{ container }}"
+    ansible_become: yes
+    ansible_become_method: sudo
+  when: container.install_docker | default(false) and container.initial_setup | default(false)

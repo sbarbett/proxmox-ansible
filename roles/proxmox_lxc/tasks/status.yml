@@ -1,4 +1,6 @@
 ---
+# roles/proxmox_lxc/tasks/status.yml
+
 - name: Wait for container to be registered with expected hostname
   command: >
     {{ role_path }}/files/wait_for_container.py

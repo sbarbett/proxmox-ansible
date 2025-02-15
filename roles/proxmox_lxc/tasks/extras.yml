@@ -1,4 +1,6 @@
 ---
+# roles/proxmox_lxc/tasks/extras.yml
+
 - name: Update apt cache and install extra packages
   apt:
     update_cache: yes
