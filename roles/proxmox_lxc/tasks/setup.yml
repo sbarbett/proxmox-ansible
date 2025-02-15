@@ -1,3 +1,4 @@
+---
 - name: Update apt cache and upgrade packages
   apt:
     update_cache: yes
@@ -23,6 +24,15 @@
     name: "{{ container.username | default('demo') }}"
     groups: sudo
     append: yes
+  become: yes
+
+- name: Allow user passwordless sudo
+  copy:
+    dest: "/etc/sudoers.d/{{ container.username | default('demo') }}"
+    content: "{{ container.username | default('demo') }} ALL=(ALL) NOPASSWD: ALL\n"
+    owner: root
+    group: root
+    mode: '0440'
   become: yes
 
 - name: Copy SSH public key to demo's authorized_keys

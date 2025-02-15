@@ -19,8 +19,28 @@
 
 - name: Run initial setup on provisioned containers
   hosts: proxmox_containers
-  gather_facts: yes
+  gather_facts: no
   become: yes
   tasks:
+    - name: Test connection as root
+      wait_for_connection:
+        timeout: 15
+      ignore_errors: yes
+      register: root_conn_test
+
+    - name: Debug root connection test result
+      debug:
+        var: root_conn_test
+
+    - name: Skip initial setup if root connection fails
+      meta: end_play
+      when: root_conn_test.failed
+
     - name: Run initial setup tasks inside container
       include_tasks: ../roles/proxmox_lxc/tasks/setup.yml
+
+- name: Run extras setup on provisioned containers (non-root)
+  hosts: proxmox_containers_extras
+  gather_facts: yes
+  tasks:
+    - include_tasks: ../roles/proxmox_lxc/tasks/extras.yml
