@@ -10,7 +10,7 @@
     path: "/home/{{ container.username | default('demo') }}/docker/{{ item.key }}"
     state: directory
     mode: '0755'
-  loop: "{{ container.docker_containers | dict2items }}"
+  loop: "{{ container.docker_containers | default({}) | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
   become: yes
@@ -21,7 +21,7 @@
     src: "{{ path_to_compose_files }}/{{ item.key }}.yml"
     dest: "/home/{{ container.username | default('demo') }}/docker/{{ item.key }}/docker-compose.yml"
     mode: '0644'
-  loop: "{{ container.docker_containers | dict2items }}"
+  loop: "{{ container.docker_containers | default({}) | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
   become: yes
@@ -32,7 +32,7 @@
     src: "{{ path_to_compose_files }}/{{ item.key }}.env.j2"
     dest: "/home/{{ container.username | default('demo') }}/docker/{{ item.key }}/.env"
     mode: '0644'
-  loop: "{{ container.docker_containers | dict2items }}"
+  loop: "{{ container.docker_containers | default({}) | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
   become: yes
@@ -42,7 +42,7 @@
   shell: "docker compose up -d"
   args:
     chdir: "/home/{{ container.username | default('demo') }}/docker/{{ item.key }}"
-  loop: "{{ container.docker_containers | dict2items }}"
+  loop: "{{ container.docker_containers | default({}) | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
   become: yes
