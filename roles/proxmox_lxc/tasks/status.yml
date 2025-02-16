@@ -1,6 +1,10 @@
 ---
 # roles/proxmox_lxc/tasks/status.yml
 
+# - name: Debug role_path value
+#   debug:
+#     msg: "role_path is: {{ role_path | default('not defined') }}"
+
 - name: Wait for container to be registered with expected hostname
   command: >
     {{ role_path }}/files/wait_for_container.py
@@ -13,6 +17,7 @@
     --expected-hostname "{{ container.hostname }}"
     --retries 10
     --delay 3
+  delegate_to: localhost
   register: container_status
   until: container_status.rc == 0
   retries: 10

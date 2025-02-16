@@ -21,4 +21,5 @@
     onboot: "{{ container.onboot | default(false) }}"
     startup: "{{ container.startup | default(omit) }}"
     pubkey: "{{ lookup('file', container.pubkey_file) | default(omit) }}"
+    features: "{{ container.features | default(omit) }}"
     state: present
