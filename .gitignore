@@ -1,8 +1,8 @@
 ## Ignore Ansible stuff
 vars/**
 inventory
-roles/proxmox_lxc/defaults/main.yml
-roles/geerlingguy.docker/**
+roles/**
+*.tar.gz
 
 ## Generic Python .gitignore
 # Byte-compiled / optimized / DLL files

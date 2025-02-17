@@ -1,0 +1,16 @@
+namespace: sbarbett
+name: proxmox_management
+version: "1.0.1"
+readme: README.md
+authors:
+  - Shane Barbetta
+description: >
+  A collection for managing Proxmox LXC containers (provisioning, configuration, and Docker deployment).
+license: MIT
+tags:
+  - proxmox
+  - lxc
+  - docker
+dependencies:
+  community.general: ">=6.0.0"
+repository: https://github.com/sbarbett/proxmox-ansible

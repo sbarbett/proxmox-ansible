@@ -1,49 +1,48 @@
 ---
-- name: Manage Proxmox LXC containers
+- name: Provision Proxmox LXC containers
   hosts: localhost
   connection: local
   gather_facts: no
-
-  # Load credentials and LXC definitions
   vars_files:
     - ../vars/proxmox-vault.yml
     - ../vars/lxcs.yml
-
   tasks:
-    - name: Process each LXC container
+    - name: Run proxmox_provision role for each container
       include_role:
-        name: proxmox_lxc
+        name: sbarbett.proxmox_management.proxmox_provision
+      vars:
+        container: "{{ item }}"
       loop: "{{ lxcs }}"
-      loop_control:
-        loop_var: container
 
-- name: Run initial setup on provisioned containers
+- name: Populate dynamic inventory with container hosts
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - ../vars/proxmox-vault.yml
+    - ../vars/lxcs.yml
+  tasks:
+    - name: Run container_setup inventory tasks for each container
+      include_role:
+        name: sbarbett.proxmox_management.container_inventory
+        tasks_from: inventory.yml
+      vars:
+        container: "{{ item }}"
+      loop: "{{ lxcs }}"
+
+- name: Run initial container setup
   hosts: proxmox_containers
   gather_facts: no
   become: yes
-  tasks:
-    - name: Test connection as root
-      wait_for_connection:
-        timeout: 15
-      ignore_errors: yes
-      register: root_conn_test
+  roles: 
+    - role: sbarbett.proxmox_management.container_setup
 
-    - name: Debug root connection test result
-      debug:
-        var: root_conn_test
-
-    - name: Skip initial setup if root connection fails
-      meta: end_play
-      when: root_conn_test.failed
-
-    - name: Run initial setup tasks inside container
-      include_tasks: ../roles/proxmox_lxc/tasks/setup.yml
-
-- name: Run extras setup on provisioned containers (non-root)
+- name: Run extras configuration on containers
   hosts: proxmox_containers_extras
   gather_facts: yes
-  tasks:
-    - include_tasks: ../roles/proxmox_lxc/tasks/extras.yml
+  become: yes
+  roles: 
+    - role: sbarbett.proxmox_management.container_extras
 
 - name: Run docker setup on provisioned containers
   hosts: proxmox_containers_docker
@@ -63,10 +62,11 @@
         docker_compose_package: docker-compose-plugin
         docker_compose_package_state: present
         docker_users:
-          - "{{ container.username | default('demo') }}"
+          - "{{ container.config.username }}"
 
 - name: Run docker container setup on provisioned containers
   hosts: proxmox_containers_docker
   gather_facts: yes
-  tasks:
-    - include_tasks: ../roles/proxmox_lxc/tasks/compose_setup.yml
+  become: yes
+  roles: 
+    - role: sbarbett.proxmox_management.docker_compose

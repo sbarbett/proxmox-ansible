@@ -1,0 +1,13 @@
+---
+- name: Ensure LXC container is started on Proxmox
+  community.general.proxmox:
+    api_host: "{{ proxmox_api_host }}"
+    api_user: "{{ proxmox_api_user }}"
+    api_token_id: "{{ proxmox_api_id }}"
+    api_token_secret: "{{ proxmox_api_secret }}"
+    node: "{{ proxmox_node }}"
+    vmid: "{{ container.vmid }}"
+    state: started
+  register: start_result
+  failed_when: start_result.failed and ('already running' not in start_result.msg)
+  when: not (container_already_running | default(false))

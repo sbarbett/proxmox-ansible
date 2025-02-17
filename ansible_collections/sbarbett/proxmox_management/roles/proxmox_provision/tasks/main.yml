@@ -1,0 +1,12 @@
+---
+# Pre-check: Determine if container is already running
+- include_tasks: precheck.yml
+
+# Run the creation task
+- include_tasks: create.yml
+
+# Wait until the container is properly registered
+- include_tasks: wait.yml
+
+# Start the container
+- include_tasks: start.yml

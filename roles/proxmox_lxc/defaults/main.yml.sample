@@ -1,6 +1,0 @@
-#SPDX-License-Identifier: MIT-0
----
-# defaults file for roles/proxmox_lxc
-
-proxmox_api_host: "proxmox.example.com"
-proxmox_node: "pve"

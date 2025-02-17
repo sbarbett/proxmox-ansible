@@ -1,0 +1,43 @@
+---
+- name: Create docker directory for each container
+  file:
+    path: "/home/{{ container.config.username }}/docker/{{ item.key }}"
+    state: directory
+    mode: '0755'
+  loop: "{{ container.config.docker_containers | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  become: yes
+  become_user: "{{ container.config.username }}"
+
+- name: Copy docker compose file for container "{{ item.key }}"
+  copy:
+    src: "{{ role_path }}/files/compose_files/{{ item.key }}.yml"
+    dest: "/home/{{ container.config.username }}/docker/{{ item.key }}/docker-compose.yml"
+    mode: '0644'
+  loop: "{{ container.config.docker_containers | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  become: yes
+  become_user: "{{ container.config.username }}"
+
+- name: Template .env file for container "{{ item.key }}"
+  template:
+    src: "{{ role_path }}/files/compose_files/{{ item.key }}.env.j2"
+    dest: "/home/{{ container.config.username }}/docker/{{ item.key }}/.env"
+    mode: '0644'
+  loop: "{{ container.config.docker_containers | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  become: yes
+  become_user: "{{ container.config.username }}"
+
+- name: Run docker compose up -d in container directory for "{{ item.key }}"
+  shell: "docker compose up -d"
+  args:
+    chdir: "/home/{{ container.config.username }}/docker/{{ item.key }}"
+  loop: "{{ container.config.docker_containers | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  become: yes
+  become_user: "{{ container.config.username }}"
