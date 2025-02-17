@@ -4,8 +4,8 @@ An Ansible role (with example playbooks) for managing Proxmox LXCs and VMs. This
 
 ## Overview
 
-- **Role:**  
-  `roles/proxmox_lxc` contains tasks for LXCs on a Proxmox server.
+- **Collection:**  
+  `ansible_collections/sbarbett/proxmox_management` contains roles for LXCs on a Proxmox server.
   
 - **Examples:**  
   The `playbooks/` directory includes sample playbooks.
@@ -14,7 +14,7 @@ An Ansible role (with example playbooks) for managing Proxmox LXCs and VMs. This
   Configure API credentials (via Ansible Vault) and container definitions in the `vars/` folder.
 
 - **Dependencies:**  
-  A `bootstrap.yml` playbook is provided to install required Python libraries (`proxmoxer` and `requests`).
+  A `bootstrap.yml` playbook is provided to install required Python libraries (`proxmoxer` and `requests`) and other dependencies.
 
 ## Requirements
 
@@ -33,8 +33,14 @@ An Ansible role (with example playbooks) for managing Proxmox LXCs and VMs. This
    ansible-playbook -i inventory bootstrap.yml
    ```
 
-2. Configure your vault and container definitions in `vars/`.
-3. Run the playbook:
+2. **Install the collection:**
+
+   ```bash
+   ansible-galaxy collection install sbarbett.proxmox_management
+   ```
+
+3. Configure your vault and container definitions in `vars/`.
+4. Run the playbook:
 
    ```bash
    ansible-playbook --vault-password-file vars/.proxmox-vault-pass playbooks/manage-lxcs.yml

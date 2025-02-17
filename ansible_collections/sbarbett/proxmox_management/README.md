@@ -42,7 +42,7 @@ Integrate the collection into your playbooks to create a unified workflow. For e
   tasks:
     - name: Run proxmox_provision role for each container
       include_role:
-        name: proxmox_provision
+        name: sbarbett.proxmox_management.proxmox_provision
       vars:
         container: "{{ item }}"
       loop: "{{ lxcs }}"
@@ -57,7 +57,7 @@ Integrate the collection into your playbooks to create a unified workflow. For e
   tasks:
     - name: Run container_setup inventory tasks for each container
       include_role:
-        name: container_inventory
+        name: sbarbett.proxmox_management.container_inventory
         tasks_from: inventory.yml
       vars:
         container: "{{ item }}"
@@ -68,14 +68,14 @@ Integrate the collection into your playbooks to create a unified workflow. For e
   gather_facts: no
   become: yes
   roles: 
-    - role: container_setup
+    - role: sbarbett.proxmox_management.container_setup
 
 - name: Run extras configuration on containers
   hosts: proxmox_containers_extras
   gather_facts: yes
   become: yes
   roles: 
-    - role: container_extras
+    - role: sbarbett.proxmox_management.container_extras
 
 - name: Run docker setup on provisioned containers
   hosts: proxmox_containers_docker
@@ -102,7 +102,7 @@ Integrate the collection into your playbooks to create a unified workflow. For e
   gather_facts: yes
   become: yes
   roles: 
-    - role: docker_compose
+    - role: sbarbett.proxmox_management.docker_compose
 ```
 
 Your `lxcs.yml` file might look like this:
