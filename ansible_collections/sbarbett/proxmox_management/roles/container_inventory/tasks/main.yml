@@ -1,3 +1,0 @@
----
-# Retrieve the container IP and create a dynamic inventory
-- include_tasks: inventory.yml
