@@ -1,11 +1,12 @@
 ---
-- name: Provision Proxmox LXC containers
+- name: Provision Proxmox LXCs
   hosts: localhost
   connection: local
   gather_facts: no
-  vars_files:
-    - ../vars/proxmox-vault.yml
-    - ../vars/lxcs.yml
+  # If you need to explicitly define your vault and LXC settings paths
+  # vars_files:
+  #   - /path/to/vars/proxmox-vault.yml
+  #   - /path/to/vars/lxcs.yml
   tasks:
     - name: Run proxmox_provision role for each container
       include_role:
@@ -18,9 +19,9 @@
   hosts: localhost
   connection: local
   gather_facts: no
-  vars_files:
-    - ../vars/proxmox-vault.yml
-    - ../vars/lxcs.yml
+  # vars_files:
+  #   - /path/to/vars/proxmox-vault.yml
+  #   - /path/to/vars/lxcs.yml
   tasks:
     - name: Run container_setup inventory tasks for each container
       include_role:

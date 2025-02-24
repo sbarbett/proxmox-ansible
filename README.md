@@ -1,20 +1,22 @@
 # proxmox_management
 
-This collection provides a unified solution for provisioning, configuring, and managing Proxmox LXC containers with Ansible. It bundles several roles to handle everything from container creation to advanced configuration and Docker container deployment on LXC hosts.
+This Ansible collection makes it easy to provision, configure, and manage Proxmox LXC containers. It includes several roles that handle everything from setting up containers to applying advanced configurations and even deploying Docker containers inside them.
 
 ## Overview
 
 The collection is composed of the following roles:
 
-* **proxmox_provision** – Provisions and starts LXC containers on a Proxmox host using the Proxmox API.
-* **container_inventory** – Retrieves each container's IP address using a custom Python script and dynamically registers the container in the Ansible inventory.
-* **container_setup** – Performs initial container configuration, such as updating packages, creating non-root users, and disabling root login.
-* **container_extras** – Applies additional configuration tasks as a non-root user, like installing extra packages and customizing system messages.
+* **proxmox_provision** – Creates and starts LXC containers on a Proxmox host using the Proxmox API.
+* **container_inventory** – Retrieves container IP addresses using a Python script and automatically adds them to the Ansible inventory.
+* **container_setup** – Handles basic setup, like updating packages, creating non-root users, and disabling root login.
+* **container_extras** – Runs additional non-root setup tasks, such as installing extra packages and customizing system messages.
 * **docker_compose** – Deploys and manages Docker containers on LXC hosts using Docker Compose.
 
-These roles are designed to work together in a larger workflow that begins with provisioning containers and ends with deploying application containers via Docker.
+These roles are designed to work together, starting with container creation and ending with full application deployment via Docker.
 
 ## Requirements
+
+To use this collection, you'll need:
 
 * **Ansible:** Version 2.9 or later.
 * **Python Libraries (on the control node):**
@@ -24,120 +26,41 @@ These roles are designed to work together in a larger workflow that begins with 
 * **Ansible Collection Dependency:** community.general (>=6.0.0)
 * **Proxmox API Access:** Valid credentials and network access to your Proxmox server.
 
-_Note:_ I suggest using `geerlingguy.docker` for installing Docker and its plugins.
+_Note:_ I recommend using `geerlingguy.docker` to install Docker and its dependencies.
+
+## Quick Start
+
+1. **Set up your environment:** Use the `bootstrap.yml` playbook in `examples/` to install the required dependencies:
+
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install ansible
+   ansible-playbook examples/bootstrap.yml
+   ```
+
+2. **Install the collection:**
+
+   ```bash
+   ansible-galaxy collection install sbarbett.proxmox_management
+   ```
+
+3. **Configure your vault and container definitions** in `group_vars/`.
 
 ## Usage
 
-Integrate the collection into your playbooks to create a unified workflow. For example:
+You can integrate this collection into your playbooks for a complete workflow. Here are some useful examples:
 
-```yaml
----
-- name: Provision Proxmox LXC containers
-  hosts: localhost
-  connection: local
-  gather_facts: no
-  vars_files:
-    - ../vars/proxmox-vault.yml
-    - ../vars/lxcs.yml
-  tasks:
-    - name: Run proxmox_provision role for each container
-      include_role:
-        name: sbarbett.proxmox_management.proxmox_provision
-      vars:
-        container: "{{ item }}"
-      loop: "{{ lxcs }}"
+* [Example playbook: Full LXC workflow](https://github.com/sbarbett/proxmox-ansible/blob/main/examples/manage-lxcs.yml) - From provisioning to final setup.
+* [Example LXC dictionary](https://github.com/sbarbett/proxmox-ansible/blob/main/examples/lxcs.yml) - Defines your containers.
 
-- name: Populate dynamic inventory with container hosts
-  hosts: localhost
-  connection: local
-  gather_facts: no
-  vars_files:
-    - ../vars/proxmox-vault.yml
-    - ../vars/lxcs.yml
-  tasks:
-    - name: Run container_setup inventory tasks for each container
-      include_role:
-        name: sbarbett.proxmox_management.container_inventory
-        tasks_from: inventory.yml
-      vars:
-        container: "{{ item }}"
-      loop: "{{ lxcs }}"
+### Docker Compose Templates
 
-- name: Run initial container setup
-  hosts: proxmox_containers
-  gather_facts: no
-  become: yes
-  roles: 
-    - role: sbarbett.proxmox_management.container_setup
+This collection includes ready-to-use Docker Compose manifests for some common services:
 
-- name: Run extras configuration on containers
-  hosts: proxmox_containers_extras
-  gather_facts: yes
-  become: yes
-  roles: 
-    - role: sbarbett.proxmox_management.container_extras
-
-- name: Run docker setup on provisioned containers
-  hosts: proxmox_containers_docker
-  gather_facts: yes
-  roles:
-    - role: geerlingguy.docker
-      vars:
-        docker_edition: 'ce'
-        docker_service_state: started
-        docker_service_enabled: true
-        docker_packages:
-          - "docker-{{ docker_edition }}"
-          - "docker-{{ docker_edition }}-cli"
-          - "docker-{{ docker_edition }}-rootless-extras"
-        docker_packages_state: present
-        docker_install_compose_plugin: true
-        docker_compose_package: docker-compose-plugin
-        docker_compose_package_state: present
-        docker_users:
-          - "{{ container.config.username }}"
-
-- name: Run docker container setup on provisioned containers
-  hosts: proxmox_containers_docker
-  gather_facts: yes
-  become: yes
-  roles: 
-    - role: sbarbett.proxmox_management.docker_compose
-```
-
-Your `lxcs.yml` file might look like this:
-
-```yaml
-lxcs:
-  - vmid: 125
-    hostname: testing
-    ostemplate: "local:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst"
-    storage: "local-lvm"
-    cores: 1
-    memory: 1024
-    swap: 512
-    disk: "local-lvm:25"
-    net: "name=eth0,bridge=vmbr0,ip=dhcp"
-    password: "containerpassword"
-    onboot: true
-    pubkey_file: "~/.ssh/id_rsa.pub"
-    features: "nesting=1"
-    # Additional configuration
-    config:
-      username: demo
-      user_password: "demo123"
-      private_key: "~/.ssh/id_rsa"
-      wait_for_status: true
-      initial_setup: true
-      install_extras: true
-      install_docker: true
-      docker_containers:
-        it-tools:
-          port: 8582
-        gitea:
-          port_http: 3000
-          port_ssh: 222
-```
+* [IT Tools](https://github.com/sbarbett/proxmox-ansible/blob/main/roles/docker_compose/files/compose_files/it-tools.yml) _([Environment file](https://github.com/sbarbett/proxmox-ansible/blob/main/roles/docker_compose/files/compose_files/it-tools.env.j2))_- A collection of useful utilities for IT professionals.
+* [Gitea](https://github.com/sbarbett/proxmox-ansible/blob/main/roles/docker_compose/files/compose_files/gitea.yml) _([Environment file](https://github.com/sbarbett/proxmox-ansible/blob/main/roles/docker_compose/files/compose_files/gitea.env.j2))_ -  A lightweight, self-hosted Git service.
+* [PiHole-Unbound](https://github.com/sbarbett/proxmox-ansible/blob/main/roles/docker_compose/files/compose_files/pihole-unbound.yml) _([Environment file](https://github.com/sbarbett/proxmox-ansible/blob/main/roles/docker_compose/files/compose_files/pihole-unbound.env.j2))_ - A PiHole 6 container preconfigured with Unbound for upstream recursion.
 
 ## License
 

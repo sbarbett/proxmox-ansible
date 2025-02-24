@@ -1,0 +1,29 @@
+lxcs:
+  - vmid: 125
+    hostname: testing
+    ostemplate: "local:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst"
+    storage: "local-lvm"
+    cores: 1
+    memory: 1024
+    swap: 512
+    disk: "local-lvm:25"
+    net: "name=eth0,bridge=vmbr0,ip=dhcp"
+    password: "containerpassword"
+    onboot: true
+    pubkey_file: "~/.ssh/id_rsa.pub"
+    features: "nesting=1"
+    # Additional configuration
+    config:
+      username: demo
+      user_password: "demo123"
+      private_key: "~/.ssh/id_rsa"
+      wait_for_status: true
+      initial_setup: true
+      install_extras: true
+      install_docker: true
+      docker_containers:
+        it-tools:
+          port: 8582
+        gitea:
+          port_http: 3000
+          port_ssh: 222
