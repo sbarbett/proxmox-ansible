@@ -1,0 +1,10 @@
+---
+services:
+  it-tools:
+    image: 'corentinth/it-tools:latest'
+    env_file:
+      - .env
+    ports:
+      - '${PORT}:80'
+    restart: unless-stopped
+    container_name: it-tools

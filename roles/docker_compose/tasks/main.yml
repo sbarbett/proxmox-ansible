@@ -1,0 +1,3 @@
+---
+# Install Docker containers using Docker Compose
+- include_tasks: compose_setup.yml

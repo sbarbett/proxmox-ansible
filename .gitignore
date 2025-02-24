@@ -1,7 +1,6 @@
 ## Ignore Ansible stuff
 vars/**
 inventory
-roles/**
 *.tar.gz
 
 ## Generic Python .gitignore

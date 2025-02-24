@@ -1,0 +1,60 @@
+---
+networks:
+  dns_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${DOCKER_NETWORK_SUBNET}  # Custom subnet for the Docker network
+
+services:
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    ports:
+      # DNS Ports
+      - "53:53/tcp"
+      - "53:53/udp"
+      # Default HTTP Port
+      - "${DEFAULT_HTTP_PORT}:80/tcp"
+      # Default HTTPS Port. FTL will generate a self-signed certificate
+      - "${DEFAULT_HTTPS_PORT}:443/tcp"
+    environment:
+      TZ: '${TIME_ZONE}'  # Set the appropriate timezone
+      FTLCONF_webserver_api_password: '${PIHOLE_WEB_API_PASSWORD}'  # Set the API password
+      FTLCONF_dns_upstreams: '${UNBOUND_IP}#53'  # Point Pi-hole to Unbound
+      DNSMASQ_LISTENING: 'all'
+      FTLCONF_LOCAL_IPV4: '${PIHOLE_IP}'  # Pi-hole's static IP
+    volumes:
+      - './etc-pihole:/etc/pihole'  # Persist Pi-hole's config and databases
+    cap_add:
+      - NET_ADMIN  # Required for network configuration
+    restart: unless-stopped
+    depends_on:
+      - unbound
+    networks:
+      dns_net:
+        ipv4_address: ${PIHOLE_IP}  # Static IP for Pi-hole
+
+  unbound:
+    container_name: unbound
+    image: mvance/unbound:latest  # Official Unbound container
+    command: >
+      sh -c "if [ ! -f /opt/unbound/etc/unbound/unbound.conf ]; then \
+              echo 'server:' > /opt/unbound/etc/unbound/unbound.conf && \
+              echo '  interface: 0.0.0.0' >> /opt/unbound/etc/unbound/unbound.conf && \
+              echo '  access-control: 192.168.5.0/24 allow' >> /opt/unbound/etc/unbound/unbound.conf; \
+            fi; \
+            touch /opt/unbound/etc/unbound/a-records.conf /opt/unbound/etc/unbound/srv-records.conf /opt/unbound/etc/unbound/forward-records.conf && \
+            exec unbound -d"
+    ports:
+      - "5335:53/tcp"  # Bind Unbound to a separate port
+      - "5335:53/udp"
+    volumes:
+      - './etc-unbound:/opt/unbound/etc/unbound'  # Mount Unbound config
+      - '/dev/random:/opt/unbound/etc/unbound/dev/random'
+      - '/dev/urandom:/opt/unbound/etc/unbound/dev/urandom'
+      - '/dev/null:/opt/unbound/etc/unbound/dev/null'
+    restart: unless-stopped
+    networks:
+      dns_net:
+        ipv4_address: ${UNBOUND_IP} # Static IP for Unbound
