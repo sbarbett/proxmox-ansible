@@ -1,9 +1,9 @@
 ---
 - name: Wait for connection to container
-  wait_for_connection:
+  ansible.builtin.wait_for_connection:
     timeout: 15
   register: root_conn_test
-  ignore_errors: yes
+  ignore_errors: true
 
 # - name: Debug - Show container host
 #   debug:
@@ -22,5 +22,5 @@
 #     var: root_conn_test
 
 - name: End play if connection check fails
-  meta: end_play
+  ansible.builtin.meta: end_play
   when: root_conn_test.failed

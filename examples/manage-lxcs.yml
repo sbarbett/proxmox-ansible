@@ -2,14 +2,14 @@
 - name: Provision Proxmox LXCs
   hosts: localhost
   connection: local
-  gather_facts: no
+  gather_facts: false
   # If you need to explicitly define your vault and LXC settings paths
   # vars_files:
   #   - /path/to/vars/proxmox-vault.yml
   #   - /path/to/vars/lxcs.yml
   tasks:
     - name: Run proxmox_provision role for each container
-      include_role:
+      ansible.builtin.include_role:
         name: sbarbett.proxmox_management.proxmox_provision
       vars:
         container: "{{ item }}"
@@ -18,13 +18,13 @@
 - name: Populate dynamic inventory with container hosts
   hosts: localhost
   connection: local
-  gather_facts: no
+  gather_facts: false
   # vars_files:
   #   - /path/to/vars/proxmox-vault.yml
   #   - /path/to/vars/lxcs.yml
   tasks:
     - name: Run container_setup inventory tasks for each container
-      include_role:
+      ansible.builtin.include_role:
         name: sbarbett.proxmox_management.container_inventory
         tasks_from: inventory.yml
       vars:
@@ -33,21 +33,21 @@
 
 - name: Run initial container setup
   hosts: proxmox_containers
-  gather_facts: no
-  become: yes
-  roles: 
+  gather_facts: false
+  become: true
+  roles:
     - role: sbarbett.proxmox_management.container_setup
 
 - name: Run extras configuration on containers
   hosts: proxmox_containers_extras
-  gather_facts: yes
-  become: yes
-  roles: 
+  gather_facts: false
+  become: true
+  roles:
     - role: sbarbett.proxmox_management.container_extras
 
 - name: Run docker setup on provisioned containers
   hosts: proxmox_containers_docker
-  gather_facts: yes
+  gather_facts: false
   roles:
     - role: geerlingguy.docker
       vars:
@@ -67,7 +67,7 @@
 
 - name: Run docker container setup on provisioned containers
   hosts: proxmox_containers_docker
-  gather_facts: yes
-  become: yes
-  roles: 
+  gather_facts: false
+  become: true
+  roles:
     - role: sbarbett.proxmox_management.docker_compose

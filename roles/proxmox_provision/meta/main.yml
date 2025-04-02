@@ -3,7 +3,7 @@ galaxy_info:
   description: >
     An Ansible role to provision Proxmox LXC containers using proxmoxer and community.general modules.
   license: MIT
-  min_ansible_version: 2.9
+  min_ansible_version: "2.9"
   galaxy_tags:
     - proxmox
     - lxc

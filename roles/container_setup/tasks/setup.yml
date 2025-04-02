@@ -1,70 +1,70 @@
 ---
 - name: Update apt cache and upgrade packages
-  apt:
-    update_cache: yes
+  ansible.builtin.apt:
+    update_cache: true
     upgrade: dist
-  become: yes
+  become: true
 
 - name: Ensure sudo is installed
-  apt:
+  ansible.builtin.apt:
     name: sudo
     state: present
-  become: yes
+  become: true
 
 - name: Create non-root user
-  user:
+  ansible.builtin.user:
     name: "{{ container.config.username }}"
     shell: /bin/bash
-    create_home: yes
+    create_home: true
     password: "{{ container.config.user_password | password_hash('sha512') }}"
-  become: yes
+  become: true
 
 - name: Add user to sudo group
-  user:
+  ansible.builtin.user:
     name: "{{ container.config.username }}"
     groups: sudo
-    append: yes
-  become: yes
+    append: true
+  become: true
 
 - name: Allow user passwordless sudo
-  copy:
+  ansible.builtin.copy:
     dest: "/etc/sudoers.d/{{ container.config.username }}"
     content: "{{ container.config.username }} ALL=(ALL) NOPASSWD: ALL\n"
     owner: root
     group: root
     mode: '0440'
-  become: yes
+  become: true
 
 - name: Copy SSH public key to authorized_keys
-  authorized_key:
+  ansible.posix.authorized_key:
     user: "{{ container.config.username }}"
     state: present
     key: "{{ lookup('file', container.pubkey_file) }}"
-  become: yes
+  become: true
 
 - name: Ensure PubkeyAuthentication is enabled in sshd_config
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/ssh/sshd_config
     regexp: '^#?PubkeyAuthentication'
     line: 'PubkeyAuthentication yes'
-  become: yes
+  become: true
 
 - name: Ensure PasswordAuthentication is disabled in sshd_config
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/ssh/sshd_config
     regexp: '^#?PasswordAuthentication'
     line: 'PasswordAuthentication no'
-  become: yes
+  become: true
 
 - name: Ensure PermitRootLogin is disabled in sshd_config
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/ssh/sshd_config
     regexp: '^#?PermitRootLogin'
     line: 'PermitRootLogin no'
-  become: yes
+  become: true
 
 - name: Restart SSH service
-  service:
+  ansible.builtin.service:
     name: ssh
     state: restarted
-  become: yes
+  become: true

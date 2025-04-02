@@ -2,6 +2,7 @@
 vars/**
 inventory
 *.tar.gz
+.ansible
 
 ## Generic Python .gitignore
 # Byte-compiled / optimized / DLL files

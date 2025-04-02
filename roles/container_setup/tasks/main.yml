@@ -1,6 +1,8 @@
 ---
 # Run connection check to make sure root user can connect
-- include_tasks: connection_check.yml
+- name: Include connection check tasks
+  ansible.builtin.include_tasks: connection_check.yml
 
 # Run initial setup tasks (disable root, create non-root user, etc.)
-- include_tasks: setup.yml
+- name: Include initial setup tasks
+  ansible.builtin.include_tasks: setup.yml

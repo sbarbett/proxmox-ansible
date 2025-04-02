@@ -3,7 +3,7 @@
 - name: Bootstrap dependencies
   hosts: localhost
   connection: local
-  gather_facts: no
+  gather_facts: false
   tasks:
     - name: Install required Python libraries
       ansible.builtin.pip:
@@ -14,9 +14,9 @@
         state: present
 
     - name: Upgrade community.general collection
-      command: ansible-galaxy collection install community.general --upgrade
+      ansible.builtin.command: ansible-galaxy collection install community.general --upgrade
       changed_when: false
 
     - name: Install required Ansible Galaxy role (geerlingguy.docker)
-      command: ansible-galaxy role install geerlingguy.docker
+      ansible.builtin.command: ansible-galaxy role install geerlingguy.docker
       changed_when: false

@@ -1,7 +1,7 @@
 ---
 - name: Update apt cache and install extra packages
-  apt:
-    update_cache: yes
+  ansible.builtin.apt:
+    update_cache: true
     name:
       - kitty-terminfo
       - tmux
@@ -10,23 +10,55 @@
       - jq
       - fzf
       - neofetch
+      - gawk
+      - make
+      - git
     state: present
-  become: yes
+  become: true
+  register: apt_result
+  notify: Update apt cache
+
+- name: Check if update-motd.d backup exists
+  ansible.builtin.stat:
+    path: /etc/update-motd.d.bak
+  become: true
+  register: motd_backup_stat
 
 - name: Backup update-motd.d and create new directory
-  shell: "mv /etc/update-motd.d /etc/update-motd.d.bak && mkdir /etc/update-motd.d"
-  become: yes
+  ansible.builtin.shell: "mv /etc/update-motd.d /etc/update-motd.d.bak && mkdir /etc/update-motd.d"
+  become: true
+  changed_when: not motd_backup_stat.stat.exists
+
+- name: Check motd file size
+  ansible.builtin.stat:
+    path: /etc/motd
+  become: true
+  register: motd_stat
 
 - name: Truncate /etc/motd
-  shell: "truncate -s 0 /etc/motd"
-  become: yes
+  ansible.builtin.file:
+    path: /etc/motd
+    state: touch
+    mode: '0644'
+  become: true
+  changed_when: motd_stat.stat.size > 0
 
-- name: Create a .hushlogin file 
-  shell: "touch ~/.hushlogin && chmod 644 ~/.hushlogin"
-  become: yes
+- name: Check if .hushlogin exists
+  ansible.builtin.stat:
+    path: "~/.hushlogin"
+  become: true
+  register: hushlogin_stat
+
+- name: Create a .hushlogin file
+  ansible.builtin.file:
+    path: "~/.hushlogin"
+    state: touch
+    mode: '0644'
+  become: true
+  changed_when: not hushlogin_stat.stat.exists
 
 - name: Append neofetch block to .bashrc
-  blockinfile:
+  ansible.builtin.blockinfile:
     path: "/home/{{ container.config.username }}/.bashrc"
     marker: "# {mark} NEOFETCH BLOCK"
     block: |
@@ -39,5 +71,40 @@
               ;;
           *) ;;  # Do nothing for non-interactive shells
       esac
-  become: yes
+  become: true
   become_user: "{{ container.config.username }}"
+
+- name: Install ble.sh
+  block:
+    - name: Clone ble.sh repository
+      ansible.builtin.git:
+        repo: https://github.com/akinomyoga/ble.sh.git
+        dest: "/home/{{ container.config.username }}/ble.sh"
+        version: master
+        depth: 1
+        recursive: true
+      become: true
+      become_user: "{{ container.config.username }}"
+
+    - name: Install ble.sh
+      ansible.builtin.command: "make -C ble.sh install PREFIX=/home/{{ container.config.username }}/.local"
+      args:
+        chdir: "/home/{{ container.config.username }}"
+      become: true
+      become_user: "{{ container.config.username }}"
+      changed_when: true  # Since make will report its own changes
+
+    - name: Add ble.sh source to .bashrc
+      ansible.builtin.lineinfile:
+        path: "/home/{{ container.config.username }}/.bashrc"
+        line: "source /home/{{ container.config.username }}/.local/share/blesh/ble.sh"
+        state: present
+      become: true
+      become_user: "{{ container.config.username }}"
+
+    - name: Clean up ble.sh directory
+      ansible.builtin.file:
+        path: "/home/{{ container.config.username }}/ble.sh"
+        state: absent
+      become: true
+      become_user: "{{ container.config.username }}"

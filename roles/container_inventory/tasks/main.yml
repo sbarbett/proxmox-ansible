@@ -1,3 +1,4 @@
 ---
 # Retrieve the container IP and create a dynamic inventory
-- include_tasks: inventory.yml
+- name: Include inventory tasks
+  ansible.builtin.include_tasks: inventory.yml

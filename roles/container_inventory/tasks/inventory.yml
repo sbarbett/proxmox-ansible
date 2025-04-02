@@ -1,6 +1,6 @@
 ---
 - name: Retrieve container IP via DHCP using proxmoxer
-  command: >
+  ansible.builtin.command: >
     {{ role_path }}/files/get_container_ip.py
     --host "{{ proxmox_api_host }}"
     --user "{{ proxmox_api_user }}"
@@ -14,15 +14,15 @@
   changed_when: false
 
 - name: Set container IP fact
-  set_fact:
+  ansible.builtin.set_fact:
     container_ip: "{{ ip_result.stdout }}"
 
 - name: Debug - Show container IP
-  debug:
+  ansible.builtin.debug:
     msg: "Container IP is: {{ container_ip }}"
 
 - name: Add container to dynamic inventory (as root)
-  add_host:
+  ansible.builtin.add_host:
     name: "lxc_{{ container.vmid }}"
     groups: proxmox_containers
     ansible_host: "{{ container_ip }}"
@@ -34,7 +34,7 @@
   when: container.config.initial_setup | default(false)
 
 - name: Add container to dynamic inventory (non-root for extras)
-  add_host:
+  ansible.builtin.add_host:
     name: "lxc_{{ container.vmid }}_user"
     groups: proxmox_containers_extras
     ansible_host: "{{ container_ip }}"
@@ -43,12 +43,12 @@
     ansible_ssh_private_key_file: "{{ container.config.private_key }}"
     ansible_python_interpreter: /usr/bin/python3
     container: "{{ container }}"
-    ansible_become: yes
+    ansible_become: true
     ansible_become_method: sudo
   when: container.config.install_extras | default(false) and container.config.initial_setup | default(false)
 
 - name: Add container to dynamic inventory for docker setup
-  add_host:
+  ansible.builtin.add_host:
     name: "lxc_{{ container.vmid }}_user"
     groups: proxmox_containers_docker
     ansible_host: "{{ container_ip }}"
@@ -58,6 +58,6 @@
     ansible_python_interpreter: /usr/bin/python3
     path_to_compose_files: "{{ role_path }}/files/compose_files"
     container: "{{ container }}"
-    ansible_become: yes
+    ansible_become: true
     ansible_become_method: sudo
   when: container.config.install_docker | default(false) and container.config.initial_setup | default(false)

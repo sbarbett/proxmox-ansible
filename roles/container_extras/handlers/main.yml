@@ -1,3 +1,8 @@
-#SPDX-License-Identifier: MIT-0
+# SPDX-License-Identifier: MIT-0
 ---
 # handlers file for roles/container_extras
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+  become: true

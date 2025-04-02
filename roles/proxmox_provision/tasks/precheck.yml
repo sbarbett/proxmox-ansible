@@ -1,6 +1,6 @@
 ---
 - name: Check if the container is already running
-  command: >
+  ansible.builtin.command: >
     {{ role_path }}/files/check_container_running.py
     --host "{{ proxmox_api_host }}"
     --user "{{ proxmox_api_user }}"
@@ -10,8 +10,9 @@
     --vmid "{{ container.vmid }}"
   delegate_to: localhost
   register: container_status
-  ignore_errors: yes
+  changed_when: false
+  ignore_errors: true
 
 - name: Set fact whether container is running
-  set_fact:
+  ansible.builtin.set_fact:
     container_already_running: "{{ container_status.rc == 0 }}"
