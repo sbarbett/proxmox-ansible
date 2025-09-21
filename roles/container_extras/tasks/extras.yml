@@ -9,7 +9,7 @@
       - curl
       - jq
       - fzf
-      - neofetch
+      - fastfetch
       - gawk
       - make
       - git
@@ -57,16 +57,16 @@
   become: true
   changed_when: not hushlogin_stat.stat.exists
 
-- name: Append neofetch block to .bashrc
+- name: Append fastfetch block to .bashrc
   ansible.builtin.blockinfile:
     path: "/home/{{ container.config.username }}/.bashrc"
-    marker: "# {mark} NEOFETCH BLOCK"
+    marker: "# {mark} FASTFETCH BLOCK"
     block: |
-      # Run neofetch only in interactive shells
+      # Run fastfetch only in interactive shells
       case $- in
           *i*)
               echo " "
-              neofetch
+              fastfetch
               echo " "
               ;;
           *) ;;  # Do nothing for non-interactive shells
