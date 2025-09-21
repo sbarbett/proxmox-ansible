@@ -5,22 +5,29 @@
   register: root_conn_test
   ignore_errors: true
 
-# - name: Debug - Show container host
-#   debug:
-#     msg: "Container host is: {{ ansible_host }}"
-
-# - name: Debug - Show container private key file
-#   debug:
-#     msg: "Container key is: {{ ansible_ssh_private_key_file }}"
-
-# - name: Debug - Show container user
-#   debug:
-#     msg: "Container user is: {{ ansible_user }}"
-
-# - name: Debug - Show connection check result
-#   debug:
-#     var: root_conn_test
-
-- name: End play if connection check fails
-  ansible.builtin.meta: end_play
+- name: Try non-root user connection if root fails
+  ansible.builtin.wait_for_connection:
+    timeout: 15
+  vars:
+    ansible_user: "{{ container.config.username }}"
+  register: user_conn_test
+  ignore_errors: true
   when: root_conn_test.failed
+
+- name: Update inventory with non-root user if root failed
+  ansible.builtin.add_host:
+    name: "{{ inventory_hostname }}"
+    groups: proxmox_containers
+    ansible_host: "{{ ansible_host }}"
+    ansible_connection: ssh
+    ansible_user: "{{ container.config.username }}"
+    ansible_ssh_private_key_file: "{{ container.config.private_key }}"
+    ansible_python_interpreter: /usr/bin/python3
+    container: "{{ container }}"
+    ansible_become: true
+    ansible_become_method: sudo
+  when: root_conn_test.failed and not user_conn_test.failed
+
+- name: End play if both connection attempts fail
+  ansible.builtin.meta: end_play
+  when: root_conn_test.failed and (user_conn_test.failed | default(true))
