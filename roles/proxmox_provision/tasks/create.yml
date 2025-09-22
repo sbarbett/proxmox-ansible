@@ -3,8 +3,9 @@
   community.proxmox.proxmox:
     api_host: "{{ proxmox_api_host }}"
     api_user: "{{ proxmox_api_user }}"
-    api_token_id: "{{ proxmox_api_id }}"
-    api_token_secret: "{{ proxmox_api_secret }}"
+    api_token_id: "{{ proxmox_api_id | default(omit) }}"
+    api_token_secret: "{{ proxmox_api_secret | default(omit) }}"
+    api_password: "{{ proxmox_api_password | default(omit) }}"
     node: "{{ proxmox_node }}"
     vmid: "{{ container.vmid }}"
     hostname: "{{ container.hostname }}"
@@ -20,4 +21,5 @@
     startup: "{{ container.startup | default(omit) }}"
     pubkey: "{{ lookup('file', container.pubkey_file) | default(omit) }}"
     features: "{{ container.features | default(omit) }}"
+    mounts: "{{ container.mounts | default(omit) }}"
     state: present

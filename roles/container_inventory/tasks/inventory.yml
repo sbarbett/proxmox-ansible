@@ -4,8 +4,9 @@
     {{ role_path }}/files/get_container_ip.py
     --host "{{ proxmox_api_host }}"
     --user "{{ proxmox_api_user }}"
-    --token_name "{{ proxmox_api_id }}"
-    --token_value "{{ proxmox_api_secret }}"
+    --token_name "{{ proxmox_api_id | default('') }}"
+    --token_value "{{ proxmox_api_secret | default('') }}"
+    --password "{{ proxmox_api_password | default('') }}"
     --node "{{ proxmox_node }}"
     --vmid "{{ container.vmid }}"
     --retries 10

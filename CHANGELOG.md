@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.5] - 2025-09-21
+
+### Added
+- Support for password authentication
+- Support for mounts
+
 ### Changed
 - `neofetch` swapped out for `fastfetch` in container extras
 - Updated `community.general.proxmox` to `community.proxmox.proxmox`

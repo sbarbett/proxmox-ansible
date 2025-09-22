@@ -12,6 +12,9 @@ lxcs:
     onboot: true
     pubkey_file: "~/.ssh/id_rsa.pub"
     features: "nesting=1"
+    # Optional mounts parameter for additional storage
+    # mounts:
+    #   mp0: "local-lvm:8,mp=/mnt/data"
     # Additional configuration
     config:
       username: demo
