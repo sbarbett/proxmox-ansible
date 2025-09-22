@@ -9,6 +9,6 @@
     node: "{{ proxmox_node }}"
     vmid: "{{ container.vmid }}"
     state: started
-  register: start_result
-  failed_when: start_result.failed and ('already running' not in start_result.msg)
-  when: not (container_already_running | default(false))
+  register: proxmox_provision_start_result
+  failed_when: proxmox_provision_start_result.failed and ('already running' not in proxmox_provision_start_result.msg)
+  when: not (proxmox_provision_container_already_running | default(false))

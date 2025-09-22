@@ -41,5 +41,5 @@
     label: "{{ item.key }}"
   become: true
   become_user: "{{ container.config.username }}"
-  register: compose_result
-  changed_when: "'Creating' in compose_result.stdout or 'Starting' in compose_result.stdout"
+  register: docker_compose_compose_result
+  changed_when: "'Creating' in docker_compose_compose_result.stdout or 'Starting' in docker_compose_compose_result.stdout"

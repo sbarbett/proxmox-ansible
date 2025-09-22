@@ -10,10 +10,10 @@
     --node "{{ proxmox_node }}"
     --vmid "{{ container.vmid }}"
   delegate_to: localhost
-  register: container_status
+  register: proxmox_provision_container_status
   changed_when: false
   ignore_errors: true
 
 - name: Set fact whether container is running
   ansible.builtin.set_fact:
-    container_already_running: "{{ container_status.rc == 0 }}"
+    proxmox_provision_container_already_running: "{{ proxmox_provision_container_status.rc == 0 }}"

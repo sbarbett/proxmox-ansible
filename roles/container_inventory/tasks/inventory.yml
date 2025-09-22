@@ -11,22 +11,22 @@
     --vmid "{{ container.vmid }}"
     --retries 10
     --delay 3
-  register: ip_result
+  register: container_inventory_ip_result
   changed_when: false
 
 - name: Set container IP fact
   ansible.builtin.set_fact:
-    container_ip: "{{ ip_result.stdout }}"
+    container_inventory_container_ip: "{{ container_inventory_ip_result.stdout }}"
 
 - name: Debug - Show container IP
   ansible.builtin.debug:
-    msg: "Container IP is: {{ container_ip }}"
+    msg: "Container IP is: {{ container_inventory_container_ip }}"
 
 - name: Add container to dynamic inventory (as root)
   ansible.builtin.add_host:
     name: "lxc_{{ container.vmid }}"
     groups: proxmox_containers
-    ansible_host: "{{ container_ip }}"
+    ansible_host: "{{ container_inventory_container_ip }}"
     ansible_connection: ssh
     ansible_user: root
     ansible_ssh_private_key_file: "{{ container.config.private_key }}"
@@ -38,7 +38,7 @@
   ansible.builtin.add_host:
     name: "lxc_{{ container.vmid }}_user"
     groups: proxmox_containers_extras
-    ansible_host: "{{ container_ip }}"
+    ansible_host: "{{ container_inventory_container_ip }}"
     ansible_connection: ssh
     ansible_user: "{{ container.config.username }}"
     ansible_ssh_private_key_file: "{{ container.config.private_key }}"
@@ -52,7 +52,7 @@
   ansible.builtin.add_host:
     name: "lxc_{{ container.vmid }}_user"
     groups: proxmox_containers_docker
-    ansible_host: "{{ container_ip }}"
+    ansible_host: "{{ container_inventory_container_ip }}"
     ansible_connection: ssh
     ansible_user: "{{ container.config.username }}"
     ansible_ssh_private_key_file: "{{ container.config.private_key }}"

@@ -13,9 +13,9 @@
     --retries 10
     --delay 3
   delegate_to: localhost
-  register: container_status
+  register: proxmox_provision_container_status
   changed_when: false
-  until: container_status.rc == 0
+  until: proxmox_provision_container_status.rc == 0
   retries: 10
   delay: 3
-  when: not (container_already_running | default(false))
+  when: not (proxmox_provision_container_already_running | default(false))

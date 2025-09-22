@@ -2,7 +2,7 @@
 - name: Wait for connection to container
   ansible.builtin.wait_for_connection:
     timeout: 15
-  register: root_conn_test
+  register: container_setup_root_conn_test
   ignore_errors: true
 
 - name: Try non-root user connection if root fails
@@ -10,9 +10,9 @@
     timeout: 15
   vars:
     ansible_user: "{{ container.config.username }}"
-  register: user_conn_test
+  register: container_setup_user_conn_test
   ignore_errors: true
-  when: root_conn_test.failed
+  when: container_setup_root_conn_test.failed
 
 - name: Update inventory with non-root user if root failed
   ansible.builtin.add_host:
@@ -26,8 +26,8 @@
     container: "{{ container }}"
     ansible_become: true
     ansible_become_method: sudo
-  when: root_conn_test.failed and not user_conn_test.failed
+  when: container_setup_root_conn_test.failed and not container_setup_user_conn_test.failed
 
 - name: End play if both connection attempts fail
   ansible.builtin.meta: end_play
-  when: root_conn_test.failed and (user_conn_test.failed | default(true))
+  when: container_setup_root_conn_test.failed and (container_setup_user_conn_test.failed | default(true))

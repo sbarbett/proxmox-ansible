@@ -15,25 +15,25 @@
       - git
     state: present
   become: true
-  register: apt_result
+  register: container_extras_apt_result
   notify: Update apt cache
 
 - name: Check if update-motd.d backup exists
   ansible.builtin.stat:
     path: /etc/update-motd.d.bak
   become: true
-  register: motd_backup_stat
+  register: container_extras_motd_backup_stat
 
 - name: Backup update-motd.d and create new directory
   ansible.builtin.shell: "mv /etc/update-motd.d /etc/update-motd.d.bak && mkdir /etc/update-motd.d"
   become: true
-  changed_when: not motd_backup_stat.stat.exists
+  changed_when: not container_extras_motd_backup_stat.stat.exists
 
 - name: Check motd file size
   ansible.builtin.stat:
     path: /etc/motd
   become: true
-  register: motd_stat
+  register: container_extras_motd_stat
 
 - name: Truncate /etc/motd
   ansible.builtin.file:
@@ -41,13 +41,13 @@
     state: touch
     mode: '0644'
   become: true
-  changed_when: motd_stat.stat.size > 0
+  changed_when: container_extras_motd_stat.stat.size > 0
 
 - name: Check if .hushlogin exists
   ansible.builtin.stat:
     path: "~/.hushlogin"
   become: true
-  register: hushlogin_stat
+  register: container_extras_hushlogin_stat
 
 - name: Create a .hushlogin file
   ansible.builtin.file:
@@ -55,7 +55,7 @@
     state: touch
     mode: '0644'
   become: true
-  changed_when: not hushlogin_stat.stat.exists
+  changed_when: not container_extras_hushlogin_stat.stat.exists
 
 - name: Append fastfetch block to .bashrc
   ansible.builtin.blockinfile:
