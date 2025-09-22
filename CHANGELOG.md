@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - `neofetch` swapped out for `fastfetch` in container extras
 - Updated `community.general.proxmox` to `community.proxmox.proxmox`
+- Updated some variables to meet Ansible linting reqs
 
 ### Fixed
 - Fallback to non-root user if root connect fails
